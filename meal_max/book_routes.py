@@ -34,7 +34,7 @@ def add_book():
 @books_bp.route('/books/<int:book_id>', methods=['GET'])
 def get_book(book_id):
     """Retrieve a book by its ID."""
-    book = Book.query.get(book_id)
+    book = db.session.get(Book, book_id)
     if not book:
         return jsonify({'error': 'Book not found'}), 404
 
