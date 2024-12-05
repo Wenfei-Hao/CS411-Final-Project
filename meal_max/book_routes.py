@@ -52,7 +52,7 @@ def get_book(book_id):
 @books_bp.route('/books/<int:book_id>', methods=['PUT'])
 def update_reading_status(book_id):
     """Update the reading status of a book."""
-    book = Book.query.get(book_id)
+    book = db.session.get(Book, book_id)
     if not book:
         return jsonify({'error': 'Book not found'}), 404
 
@@ -70,7 +70,7 @@ def update_reading_status(book_id):
 @books_bp.route('/books/<int:book_id>', methods=['DELETE'])
 def delete_book(book_id):
     """Delete a book from the database."""
-    book = Book.query.get(book_id)
+    book = db.session.get(Book, book_id)
     if not book:
         return jsonify({'error': 'Book not found'}), 404
 
