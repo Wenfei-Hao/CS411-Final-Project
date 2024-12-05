@@ -7,6 +7,11 @@ books_bp = Blueprint('books', __name__)
 GOOGLE_BOOKS_API_URL = "https://www.googleapis.com/books/v1/volumes"
 
 
+@books_bp.route('/health', methods=['GET'])
+def health():
+    """Health check route to confirm the app is running."""
+    return jsonify({'status': 'App is running'}), 200
+
 
 @books_bp.route('/books', methods=['POST'])
 def add_book():
