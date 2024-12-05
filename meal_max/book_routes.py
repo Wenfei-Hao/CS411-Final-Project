@@ -78,3 +78,28 @@ def delete_book(book_id):
     db.session.commit()
 
     return jsonify({'message': 'Book deleted successfully'})
+
+
+@books_bp.route('/books/details', methods=['GET'])
+def get_book_details():
+    """Fetch book details from the Google Books API."""
+    title = request.args.get('title')
+    if not title:
+        return jsonify({'error': 'Title is required'}), 400
+
+    response = requests.get(GOOGLE_BOOKS_API_URL, params={'q': title})
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch book details'}), 500
+
+    data = response.json()
+    if 'items' not in data or not data['items']:
+        return jsonify({'error': 'No book details found'}), 404
+
+    book_data = data['items'][0]['volumeInfo']
+    return jsonify({
+        'title': book_data.get('title'),
+        'author': ', '.join(book_data.get('authors', [])),
+        'published_date': book_data.get('publishedDate'),
+        'summary': book_data.get('description'),
+        'cover_image': book_data.get('imageLinks', {}).get('thumbnail')
+    })
