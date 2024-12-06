@@ -1,7 +1,8 @@
 import pytest
 from flask import Flask
-from models.user_model import db, create_user
+from models.user_model import User, db
 from auth_routes import auth_bp
+from utils.hash_utils import hash_password, generate_salt
 
 
 @pytest.fixture
@@ -13,7 +14,7 @@ def app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
-    app.register_blueprint(auth_bp, url_prefix='/api')
+    app.register_blueprint(auth_bp)
 
     with app.app_context():
         db.create_all()
@@ -29,7 +30,7 @@ def client(app):
 
 @pytest.fixture
 def sample_user():
-    """Fixture to create a sample user for testing."""
+    """Fixture to provide a sample user for testing."""
     return {"username": "testuser", "password": "testpassword"}
 
 
@@ -38,63 +39,98 @@ def sample_user():
 ##################################################
 
 def test_health(client):
-    """Test the /health-check route."""
-    response = client.get('/api/health-check')
+    """Test the /health route."""
+    response = client.get('/health')
     assert response.status_code == 200
-    assert response.json == {"status": "ok"}
+    assert response.json == {'status': 'App is running'}
 
 
 ##################################################
-# User Authentication Test Cases
+# User Management Test Cases
 ##################################################
 
 def test_create_account_success(client, sample_user):
     """Test successful account creation."""
-    response = client.post('/api/create-account', json=sample_user)
+    response = client.post('/create-account', json=sample_user)
     assert response.status_code == 201
-    assert response.json['message'] == 'User created successfully'
+    assert 'message' in response.json
+    assert 'user_id' in response.json
+
+
+def test_create_account_duplicate_username(client, sample_user):
+    """Test creating an account with a duplicate username."""
+    # Create the user
+    client.post('/create-account', json=sample_user)
+
+    # Try to create the same user again
+    response = client.post('/create-account', json=sample_user)
+    assert response.status_code == 400
+    assert response.json['error'] == 'Username already exists'
 
 
 def test_create_account_missing_fields(client):
     """Test account creation with missing fields."""
-    response = client.post('/api/create-account', json={"username": "testuser"})
+    response = client.post('/create-account', json={"username": "testuser"})
     assert response.status_code == 400
     assert response.json['error'] == 'Username and password are required'
 
 
 def test_login_success(client, sample_user):
     """Test successful user login."""
-    client.post('/api/create-account', json=sample_user)
-    response = client.post('/api/login', json=sample_user)
+    client.post('/create-account', json=sample_user)
+    response = client.post('/login', json=sample_user)
     assert response.status_code == 200
     assert response.json['message'] == 'Login successful'
 
 
 def test_login_invalid_credentials(client, sample_user):
     """Test login with invalid credentials."""
-    client.post('/api/create-account', json=sample_user)
-    response = client.post('/api/login', json={"username": "testuser", "password": "wrongpassword"})
+    client.post('/create-account', json=sample_user)
+
+    # Attempt login with incorrect password
+    response = client.post('/login', json={"username": "testuser", "password": "wrongpassword"})
     assert response.status_code == 401
     assert response.json['error'] == 'Invalid username or password'
 
 
 def test_update_password_success(client, sample_user):
     """Test successful password update."""
-    client.post('/api/create-account', json=sample_user)
-    response = client.put('/api/update-password', json={"username": "testuser", "new_password": "newpassword"})
+    client.post('/create-account', json=sample_user)
+
+    # Update the password
+    response = client.put('/update-password', json={"username": "testuser", "new_password": "newpassword"})
     assert response.status_code == 200
     assert response.json['message'] == 'Password updated successfully'
 
 
 def test_update_password_user_not_found(client):
     """Test updating password for a non-existent user."""
-    response = client.put('/api/update-password', json={"username": "nonexistent", "new_password": "newpassword"})
+    response = client.put('/update-password', json={"username": "nonexistent", "new_password": "newpassword"})
     assert response.status_code == 404
     assert response.json['error'] == 'User not found'
 
 
 def test_update_password_missing_fields(client):
     """Test password update with missing fields."""
-    response = client.put('/api/update-password', json={"username": "testuser"})
+    response = client.put('/update-password', json={"username": "testuser"})
     assert response.status_code == 400
     assert response.json['error'] == 'Username and new password are required'
+
+
+def test_delete_account_success(client, sample_user):
+    """Test successful account deletion."""
+    # Create the user
+    create_response = client.post('/create-account', json=sample_user)
+    user_id = create_response.json['user_id']
+
+    # Delete the user
+    response = client.delete(f'/delete-account/{user_id}')
+    assert response.status_code == 200
+    assert response.json['message'] == 'Account deleted successfully'
+
+
+def test_delete_account_user_not_found(client):
+    """Test deleting a non-existent account."""
+    response = client.delete('/delete-account/9999')  # Assume 9999 is a non-existent user_id
+    assert response.status_code == 404
+    assert response.json['error'] == 'User not found'
