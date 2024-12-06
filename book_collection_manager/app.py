@@ -2,6 +2,15 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 # from flask_cors import CORS
 
+####################################################
+# The following 4 lines are added for the user
+from flask_sqlalchemy import SQLAlchemy
+import os
+from auth_routes import auth_bp
+
+####################################################
+
+
 from meal_max.models import kitchen_model
 from meal_max.models.battle_model import BattleModel
 from meal_max.utils.sql_utils import check_database_connection, check_table_exists
@@ -15,6 +24,52 @@ app = Flask(__name__)
 # If you get errors that use words like cross origin or flight,
 # uncomment this
 # CORS(app)
+
+
+####################################################
+# The following code are added for the user
+# Configure Flask-SQLAlchemy db connections and Settings
+
+# Reads the database URI from .env
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+# Read the Settings from .env
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS') == 'True'
+
+# Initiallize SQLAlchemy
+db = SQLAlchemy(app)
+
+# Registered user authentication routing blueprint
+app.register_blueprint(auth_bp)
+
+
+# Health check routing
+@app.route('/health-check', methods=['GET'])
+def health_check():
+    """Health check route to verify if the application is running.
+
+    Returns:
+        dict: A JSON response with a status message.
+    """
+    return {"status": "ok"}, 200
+
+
+if __name__ == '__main__':
+    """Main entry point of the application.
+
+    Ensures that the database tables are created before starting the Flask
+    development server.
+    """
+    # Ensure the db are created
+    with app.app_context():
+        db.create_all()  # Automatically create tables for all models
+
+    # 启动应用
+    app.run(debug=True)
+
+####################################################
+
+
+
 
 # Initialize the BattleModel
 battle_model = BattleModel()
