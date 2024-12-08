@@ -17,18 +17,18 @@ done
 
 ###############################################
 #
-# Health checks
+# Health Check
 #
 ###############################################
 
-# Function to check the health of the service
 check_health() {
-  echo "Checking health status..."
-  curl -s -X GET "$BASE_URL/health" | grep -q '"status": "healthy"'
-  if [ $? -eq 0 ]; then
-    echo "Service is healthy."
+  echo "Checking API health status..."
+  response=$(curl -s -X GET "$BASE_URL/api/health")
+  if echo "$response" | grep -q '"status": "healthy"'; then
+    echo "API health check passed."
   else
-    echo "Health check failed."
+    echo "API health check failed."
+    echo "Response: $response"
     exit 1
   fi
 }
@@ -39,34 +39,34 @@ check_health() {
 #
 ###############################################
 
-# Function to create a user
 create_user() {
-  echo "Creating a new user..."
+  echo "Creating a test user..."
   response=$(curl -s -X POST -H "Content-Type: application/json" -d '{
     "username": "testuser",
     "password": "password123"
   }' "$BASE_URL/create-account")
-  
+
   if echo "$response" | grep -q '"message": "Account created successfully"'; then
-    echo "User created successfully."
+    echo "User creation passed."
   else
-    echo "Failed to create user."
+    echo "User creation failed."
+    echo "Response: $response"
     exit 1
   fi
 }
 
-# Function to log in a user
 login_user() {
-  echo "Logging in user..."
+  echo "Logging in the test user..."
   response=$(curl -s -X POST -H "Content-Type: application/json" -d '{
     "username": "testuser",
     "password": "password123"
   }' "$BASE_URL/login")
-  
+
   if echo "$response" | grep -q '"message": "Login successful"'; then
-    echo "User logged in successfully."
+    echo "User login passed."
   else
-    echo "Failed to log in user."
+    echo "User login failed."
+    echo "Response: $response"
     exit 1
   fi
 }
@@ -77,63 +77,60 @@ login_user() {
 #
 ###############################################
 
-# Function to search for books
 search_books() {
-  echo "Searching for books..."
-  response=$(curl -s -X GET "$BASE_URL/books/search?q=python")
+  echo "Searching for books (Google Books API)..."
+  response=$(curl -s -X GET "$BASE_URL/books/details?title=python")
   
-  if echo "$response" | grep -q '"books"'; then
-    echo "Book search successful."
+  if echo "$response" | grep -q '"title"'; then
+    echo "Book search passed."
   else
-    echo "Failed to search for books."
+    echo "Book search failed."
+    echo "Response: $response"
     exit 1
   fi
 }
 
-# Function to add a book to the user's collection
 add_book() {
-  echo "Adding a book to the user's collection..."
+  echo "Adding a book to the collection..."
   response=$(curl -s -X POST -H "Content-Type: application/json" -d '{
     "title": "Learn Python",
     "author": "John Doe",
     "year": 2021
-  }' "$BASE_URL/books/add")
-  
+  }' "$BASE_URL/books")
+
   if echo "$response" | grep -q '"message": "Book added successfully"'; then
-    echo "Book added successfully."
+    echo "Add book passed."
   else
-    echo "Failed to add book."
+    echo "Add book failed."
+    echo "Response: $response"
     exit 1
   fi
 }
 
-# Function to retrieve the user's collection
 get_collection() {
-  echo "Retrieving the user's collection..."
+  echo "Retrieving the user's book collection..."
   response=$(curl -s -X GET "$BASE_URL/books/collection?user_id=1")
-  
+
   if echo "$response" | grep -q '"collection"'; then
-    echo "Book collection retrieved successfully."
+    echo "Retrieve collection passed."
   else
-    echo "Failed to retrieve book collection."
+    echo "Retrieve collection failed."
+    echo "Response: $response"
     exit 1
   fi
 }
 
-##########################################
-# Execute Tests
-##########################################
+###############################################
+#
+# Run All Tests
+#
+###############################################
 
-# Health check
+echo "Running Smoke Tests for CS411 Final Project..."
 check_health
-
-# User management tests
 create_user
 login_user
-
-# Book management tests
 search_books
 add_book
 get_collection
-
 echo "All smoke tests passed successfully!"
