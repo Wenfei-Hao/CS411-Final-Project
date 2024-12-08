@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the base URL for the Flask API
-BASE_URL="http://localhost:5000/api"
+BASE_URL="http://localhost:5000"
 
 # Flag to control whether to echo JSON output
 ECHO_JSON=false
@@ -14,7 +14,6 @@ while [ "$#" -gt 0 ]; do
   esac
   shift
 done
-
 
 ###############################################
 #
@@ -34,144 +33,107 @@ check_health() {
   fi
 }
 
-# Function to check the database connection
-check_db() {
-  echo "Checking database connection..."
-  curl -s -X GET "$BASE_URL/db-check" | grep -q '"database_status": "healthy"'
-  if [ $? -eq 0 ]; then
-    echo "Database connection is healthy."
-  else
-    echo "Database check failed."
-    exit 1
-  fi
-}
-
-##########################################################
+###############################################
 #
-# Meal Management
+# User Management Tests
 #
-##########################################################
+###############################################
 
+# Function to create a user
+create_user() {
+  echo "Creating a new user..."
+  response=$(curl -s -X POST -H "Content-Type: application/json" -d '{
+    "username": "testuser",
+    "password": "password123"
+  }' "$BASE_URL/create-account")
+  
+  if echo "$response" | grep -q '"message": "Account created successfully"'; then
+    echo "User created successfully."
+  else
+    echo "Failed to create user."
+    exit 1
+  fi
+}
 
-##########################################################
+# Function to log in a user
+login_user() {
+  echo "Logging in user..."
+  response=$(curl -s -X POST -H "Content-Type: application/json" -d '{
+    "username": "testuser",
+    "password": "password123"
+  }' "$BASE_URL/login")
+  
+  if echo "$response" | grep -q '"message": "Login successful"'; then
+    echo "User logged in successfully."
+  else
+    echo "Failed to log in user."
+    exit 1
+  fi
+}
+
+###############################################
 #
-# Battle Management
+# Book Management Tests
 #
-##########################################################
+###############################################
 
-# Prepare a meal for battle
-
-# Define the function to add a meal
-create_meal() {
-  meal=$1
-  cuisine=$2
-  price=$3
-  difficulty=$4
-
-  echo "Creating meal: $meal"
-  curl -s -X POST -H "Content-Type: application/json" -d "{
-    \"meal\": \"$meal\",
-    \"cuisine\": \"$cuisine\",
-    \"price\": $price,
-    \"difficulty\": \"$difficulty\"
-  }" "$BASE_URL/create-meal" | grep -q '"status": "success"'
-
-  if [ $? -eq 0 ]; then
-    echo "Meal '$meal' created successfully."
+# Function to search for books
+search_books() {
+  echo "Searching for books..."
+  response=$(curl -s -X GET "$BASE_URL/books/search?q=python")
+  
+  if echo "$response" | grep -q '"books"'; then
+    echo "Book search successful."
   else
-    echo "Failed to create meal '$meal'."
+    echo "Failed to search for books."
     exit 1
   fi
 }
 
-
-
-prep_combatant() {
-  meal=$1
-  echo "Preparing meal for battle: $meal"
-  response=$(curl -s -X POST -H "Content-Type: application/json" -d "{
-    \"meal\": \"$meal\"
-  }" "$BASE_URL/prep-combatant")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Meal '$meal' prepared successfully for battle."
+# Function to add a book to the user's collection
+add_book() {
+  echo "Adding a book to the user's collection..."
+  response=$(curl -s -X POST -H "Content-Type: application/json" -d '{
+    "title": "Learn Python",
+    "author": "John Doe",
+    "year": 2021
+  }' "$BASE_URL/books/add")
+  
+  if echo "$response" | grep -q '"message": "Book added successfully"'; then
+    echo "Book added successfully."
   else
-    echo "Failed to prepare meal '$meal' for battle."
+    echo "Failed to add book."
     exit 1
   fi
 }
 
-# Start a battle
-start_battle() {
-  echo "Starting a battle between the prepared combatants..."
-  response=$(curl -s -X GET "$BASE_URL/battle")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Battle executed successfully."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Battle Result JSON:"
-      echo "$response" | jq .
-    fi
+# Function to retrieve the user's collection
+get_collection() {
+  echo "Retrieving the user's collection..."
+  response=$(curl -s -X GET "$BASE_URL/books/collection?user_id=1")
+  
+  if echo "$response" | grep -q '"collection"'; then
+    echo "Book collection retrieved successfully."
   else
-    echo "Failed to start the battle."
+    echo "Failed to retrieve book collection."
     exit 1
   fi
 }
-
-# Clear combatants
-clear_combatants() {
-  echo "Clearing all combatants from the battle..."
-  response=$(curl -s -X POST "$BASE_URL/clear-combatants")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Combatants cleared successfully."
-  else
-    echo "Failed to clear combatants."
-    exit 1
-  fi
-}
-
-# Retrieve leaderboard
-get_leaderboard() {
-  echo "Retrieving leaderboard..."
-  response=$(curl -s -X GET "$BASE_URL/leaderboard")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Leaderboard retrieved successfully."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Leaderboard JSON:"
-      echo "$response" | jq .
-    fi
-  else
-    echo "Failed to retrieve leaderboard."
-    exit 1
-  fi
-}
-
 
 ##########################################
 # Execute Tests
 ##########################################
 
-# Health checks
+# Health check
 check_health
-check_db
 
-# Create and prepare meals for battle
-create_meal "Spaghetti" "Italian" 10.0 "LOW"
-create_meal "Tacos" "Mexican" 8.0 "MED"
+# User management tests
+create_user
+login_user
 
-# Prepare meals as combatants
-prep_combatant "Spaghetti"
-prep_combatant "Tacos"
+# Book management tests
+search_books
+add_book
+get_collection
 
-# Start a battle between the two meals
-start_battle
-
-# Clear combatants after the battle
-clear_combatants
-
-# Get the leaderboard after battles
-get_leaderboard
-
-echo "All battle model tests passed successfully!"
+echo "All smoke tests passed successfully!"
