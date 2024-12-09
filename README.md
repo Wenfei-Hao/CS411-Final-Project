@@ -1,7 +1,6 @@
 # Book Collection Manager:
 ## High Level Description:
 The Book Collection Manager is a web-based application designed to help users organize and manage their personal book collections efficiently. By integrating with the Google Books API, the application allows users to search for books, retrieve detailed information, and add selected titles to their collection. It also features secure user authentication, ensuring a personalized and safe user experience. The application leverages modern web development practices, enabling seamless API interaction, secure data storage, and deployment scalability through Docker.
----
 
 ## Features:
 
