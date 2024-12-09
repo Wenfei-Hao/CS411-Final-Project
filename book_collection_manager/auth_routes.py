@@ -12,7 +12,7 @@ auth_bp = Blueprint('auth', __name__)
 def health():
     """Health check route to confirm the app is running."""
     current_app.logger.info("Health check endpoint accessed.")
-    return jsonify({'status': 'App is running'}), 200
+    return jsonify({"status": "healthy"}), 200
 
 @auth_bp.route('/create-account', methods=['POST'])
 def create_account():

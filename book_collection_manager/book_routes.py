@@ -10,7 +10,7 @@ GOOGLE_BOOKS_API_URL = "https://www.googleapis.com/books/v1/volumes"
 @books_bp.route('/health', methods=['GET'])
 def health():
     """Health check route to confirm the app is running."""
-    return jsonify({'status': 'App is running'}), 200
+    return jsonify({"status": "healthy"}), 200
 
 
 @books_bp.route('/books', methods=['POST'])
@@ -20,11 +20,12 @@ def add_book():
     title = data.get('title')
     author = data.get('author')
     year = data.get('year', '')
+    user_id = data.get('user_id', 1)
 
     if not title or not author:
         return jsonify({'error': 'Title and Author are required'}), 400
 
-    book = Book(title=title, author=author, year=year)
+    book = Book(title=title, author=author, year=year, user_id = user_id)
     db.session.add(book)
     db.session.commit()
 
@@ -103,3 +104,22 @@ def get_book_details():
         'summary': book_data.get('description'),
         'cover_image': book_data.get('imageLinks', {}).get('thumbnail')
     })
+
+@books_bp.route('/books/collection', methods=['GET'])
+def get_collection():
+    """Retrieve the user's book collection."""
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'user_id is required'}), 400
+
+    user_books = Book.query.filter_by(user_id=user_id).all()
+
+    book_list = [{
+        'id': b.id,
+        'title': b.title,
+        'author': b.author,
+        'year': b.year,
+        'status': b.status
+    } for b in user_books]
+
+    return jsonify({'collection': book_list}), 200

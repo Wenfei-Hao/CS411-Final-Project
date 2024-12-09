@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+from models import db
 
-db = SQLAlchemy()
 
 class User(db.Model):
     """Represents the users table in the database."""

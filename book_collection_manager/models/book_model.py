@@ -1,10 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from models import db
 
 class Book(db.Model):
-    """Represents the books table in the database."""
-
     __tablename__ = 'books'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -14,6 +11,7 @@ class Book(db.Model):
     status = db.Column(db.String(10), nullable=False, default='unread')  # "read" or "unread"
     cover_image = db.Column(db.String(2083), nullable=True)  # URL for the book cover
     summary = db.Column(db.Text, nullable=True)  # Summary of the book
+    user_id = db.Column(db.Integer, nullable=False, default=1)
 
     def __repr__(self):
         return f"<Book {self.id}: {self.title} by {self.author}>"

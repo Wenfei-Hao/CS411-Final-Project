@@ -5,6 +5,7 @@ from models.book_model import db
 from auth_routes import auth_bp
 from book_routes import books_bp
 from utils.logger import configure_logger
+from models import db
 
 # Load environment variables from .env file
 load_dotenv()

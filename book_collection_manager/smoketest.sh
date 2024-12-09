@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the base URL for the Flask API
-BASE_URL="http://localhost:5000"
+BASE_URL="http://127.0.0.1:5000"
 
 # Flag to control whether to echo JSON output
 ECHO_JSON=false
@@ -24,7 +24,7 @@ done
 check_health() {
   echo "Checking API health status..."
   response=$(curl -s -X GET "$BASE_URL/api/health")
-  if echo "$response" | grep -q '"status": "healthy"'; then
+  if echo "$response" | grep -q '"status":"healthy"'; then
     echo "API health check passed."
   else
     echo "API health check failed."
@@ -44,9 +44,9 @@ create_user() {
   response=$(curl -s -X POST -H "Content-Type: application/json" -d '{
     "username": "testuser",
     "password": "password123"
-  }' "$BASE_URL/create-account")
+  }' "$BASE_URL/api/create-account")
 
-  if echo "$response" | grep -q '"message": "Account created successfully"'; then
+  if echo "$response" | grep -q '"message":"Account created successfully"'; then
     echo "User creation passed."
   else
     echo "User creation failed."
@@ -60,9 +60,9 @@ login_user() {
   response=$(curl -s -X POST -H "Content-Type: application/json" -d '{
     "username": "testuser",
     "password": "password123"
-  }' "$BASE_URL/login")
+  }' "$BASE_URL/api/login")
 
-  if echo "$response" | grep -q '"message": "Login successful"'; then
+  if echo "$response" | grep -q '"message":"Login successful"'; then
     echo "User login passed."
   else
     echo "User login failed."
@@ -79,7 +79,7 @@ login_user() {
 
 search_books() {
   echo "Searching for books (Google Books API)..."
-  response=$(curl -s -X GET "$BASE_URL/books/details?title=python")
+  response=$(curl -s -X GET "$BASE_URL/api/books/details?title=python")
   
   if echo "$response" | grep -q '"title"'; then
     echo "Book search passed."
@@ -96,9 +96,9 @@ add_book() {
     "title": "Learn Python",
     "author": "John Doe",
     "year": 2021
-  }' "$BASE_URL/books")
+  }' "$BASE_URL/api/books")
 
-  if echo "$response" | grep -q '"message": "Book added successfully"'; then
+  if echo "$response" | grep -q '"message":"Book added successfully"'; then
     echo "Add book passed."
   else
     echo "Add book failed."
@@ -109,7 +109,7 @@ add_book() {
 
 get_collection() {
   echo "Retrieving the user's book collection..."
-  response=$(curl -s -X GET "$BASE_URL/books/collection?user_id=1")
+  response=$(curl -s -X GET "$BASE_URL/api/books/collection?user_id=1")
 
   if echo "$response" | grep -q '"collection"'; then
     echo "Retrieve collection passed."
