@@ -76,9 +76,9 @@ The Book Collection Manager is a web-based application designed to help users or
             }
             ```
         - Example Request:
-            ```
-                GET /books/1 HTTP/1.1
-                Host: localhost:5000
+            ```bash
+            GET /books/1 HTTP/1.1
+            Host: localhost:5000
             ```
         - Example Response:
             ```json
@@ -166,7 +166,7 @@ The Book Collection Manager is a web-based application designed to help users or
             }
             ```
         - Example Request:
-            ```json
+            ```bash
             GET /books/details?title=Learn%20Python HTTP/1.1
             Host: localhost:5000
             ```
