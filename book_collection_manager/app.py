@@ -4,7 +4,7 @@ from flask import Flask, jsonify, make_response, Response
 from models.book_model import db
 from auth_routes import auth_bp
 from book_routes import books_bp
-
+from utils.logger import configure_logger
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,6 +15,8 @@ def create_app() -> Flask:
     Create and configure the Flask application.
     """
     app = Flask(__name__)
+
+    configure_logger(app.logger)
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'sqlite:///books.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
