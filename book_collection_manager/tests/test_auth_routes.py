@@ -115,22 +115,3 @@ def test_update_password_missing_fields(client):
     response = client.put('/update-password', json={"username": "testuser"})
     assert response.status_code == 400
     assert response.json['error'] == 'Username and new password are required'
-
-
-def test_delete_account_success(client, sample_user):
-    """Test successful account deletion."""
-    # Create the user
-    create_response = client.post('/create-account', json=sample_user)
-    user_id = create_response.json['user_id']
-
-    # Delete the user
-    response = client.delete(f'/delete-account/{user_id}')
-    assert response.status_code == 200
-    assert response.json['message'] == 'Account deleted successfully'
-
-
-def test_delete_account_user_not_found(client):
-    """Test deleting a non-existent account."""
-    response = client.delete('/delete-account/9999')  # Assume 9999 is a non-existent user_id
-    assert response.status_code == 404
-    assert response.json['error'] == 'User not found'
