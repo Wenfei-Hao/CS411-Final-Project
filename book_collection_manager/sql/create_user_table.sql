@@ -1,6 +1,8 @@
-CREATE TABLE IF NOT EXISTS users (
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
+    username TEXT NOT NULL UNIQUE,
     salt TEXT NOT NULL,
-    hashed_password TEXT NOT NULL
+    hashed_password TEXT NOT NULL,
 );
