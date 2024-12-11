@@ -21,6 +21,7 @@ def create_app() -> Flask:
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'sqlite:///books.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'default-secure-key')
 
     # Initialize the database
     db.init_app(app)
