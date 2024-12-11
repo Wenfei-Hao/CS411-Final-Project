@@ -350,6 +350,34 @@ High Level Description:
             ]
         }
 
+
+
+# Route: /api/db-check
+    Request Type: GET
+    Purpose: Verifies the database connection and table setup.
+    Request Format: None (No body or parameters needed).
+
+    Response Format:
+        Success Example:
+
+        {
+            "database_status": "healthy"
+        }
+    Failure Example:
+        {
+            "error": "Database connection failed"
+        }
+
+    Example Request:
+        curl -X GET http://localhost:5000/api/db-check
+    
+    Example Response:
+        {
+            "database_status": "healthy"
+        }
+
+
+
 # Steps to run application
 
 1) Install Docker, Python, and Pip
