@@ -355,7 +355,5 @@ High Level Description:
 1) Install Docker, Python, and Pip
 2) Obtain a Google Books API Key from the Google Cloud Console
 3) Add the API key to the .env file
-3) Build the docker image
-    docker build -t book_collection_manager .
-4) Run the docker container
-    docker run -d -p 5000:5000 --name book_collection_manager_container book_collection_manager
+3) Build the docker image:  docker build -t book_collection_manager .
+4) Run the docker container:  docker run -d -p 5000:5000 --name book_collection_manager_container book_collection_manager
