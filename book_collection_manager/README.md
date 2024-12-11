@@ -2,7 +2,7 @@ High Level Description:
    The Book Collection Manager is a web-based application designed to help users organize and manage their personal book collections efficiently. By integrating with the Google Books API, the application allows users to search for books, retrieve detailed information, and add selected titles to their collection. It also features secure user authentication, ensuring a personalized and safe user experience. The application leverages modern web development practices, enabling seamless API interaction, secure data storage, and deployment scalability through Docker.
 
 
-Routes:
+# Routes:
 
 
 # Route: /health
@@ -349,3 +349,13 @@ Routes:
                 }
             ]
         }
+
+# Steps to run application
+
+1) Install Docker, Python, and Pip
+2) Obtain a Google Books API Key from the Google Cloud Console
+3) Add the API key to the .env file
+3) Build the docker image
+    docker build -t book_collection_manager .
+4) Run the docker container
+    docker run -d -p 5000:5000 --name book_collection_manager_container book_collection_manager
